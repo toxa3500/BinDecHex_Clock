@@ -22,4 +22,11 @@
         android:name="com.example.bindechexclock.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
+
+    <fragment
+        android:id="@+id/navigation_romans"
+        android:name="com.example.bindechexclock.ui.romans.RomansFragment"
+        android:label="@string/title_romans"
+        tools:layout="@layout/fragment_romans" />
+
 </navigation>

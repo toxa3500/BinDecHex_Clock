@@ -14,13 +14,15 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.bindechexclock.ui.dashboard.DashboardFragment;
 import com.example.bindechexclock.ui.home.HomeFragment;
 import com.example.bindechexclock.ui.notifications.NotificationsFragment;
+import com.example.bindechexclock.ui.romans.RomansFragment;
 
 import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static String[] toxa16 = {"0", "1", "2", "3"};
+    public static String[] toxa16 = {"0", "1", "2", "3", "4"};
+    public static String[] romans = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications, R.id.navigation_romans)
                 .build();
         final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -66,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         int minutes = Calendar.getInstance().getTime().getMinutes();
         int seconds = Calendar.getInstance().getTime().getSeconds();
 
+
         toxa16[0] = "Time in binary:" + "\n"
                 + Integer.toString(hours, 2) + "\n"
                 + Integer.toString(minutes, 2) + "\n"
@@ -80,6 +83,11 @@ public class MainActivity extends AppCompatActivity {
                 + Integer.toString(hours, 16) + ":"
                 + Integer.toString(minutes, 16) + ":"
                 + Integer.toString(seconds, 16) + "\n";
+
+        toxa16[3] = "Time in Roman:" + "\n"
+                + intToRomans(hours) + "\n"
+                + intToRomans(minutes) + "\n"
+                + intToRomans(seconds) + "\n";
 
     }
 
@@ -101,9 +109,18 @@ public class MainActivity extends AppCompatActivity {
                     NotificationsFragment s = (NotificationsFragment) fragment;
                     s.notificationsViewModel.setmText(toxa16[2]);
                     break;
+                } else if (fragment instanceof RomansFragment) {
+                    RomansFragment s = (RomansFragment) fragment;
+                    s.romansViewModel.setmText(toxa16[3]);
+                    break;
                 }
             }
         }
+    }
+
+    private String intToRomans(int i) {
+        // can convert int into romans from 0 to 99
+        return romans[(i % 100) / 10 + 10] + romans[i % 10];
     }
 
 }

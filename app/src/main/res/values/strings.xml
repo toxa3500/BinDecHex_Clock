@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">BinDecHex clock</string>
+    <string name="app_name">BinDecHexRom clock</string>
     <string name="title_home">Binary</string>
     <string name="title_dashboard">Decimal</string>
     <string name="title_notifications">Hex</string>
+    <string name="title_romans">Roman</string>
 </resources>
