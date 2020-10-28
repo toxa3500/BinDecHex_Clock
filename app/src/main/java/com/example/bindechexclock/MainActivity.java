@@ -1,6 +1,5 @@
 package com.example.bindechexclock;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
@@ -15,14 +14,14 @@ import com.example.bindechexclock.ui.dashboard.DashboardFragment;
 import com.example.bindechexclock.ui.home.HomeFragment;
 import com.example.bindechexclock.ui.notifications.NotificationsFragment;
 import com.example.bindechexclock.ui.romans.RomansFragment;
+import com.example.bindechexclock.ui.stopwatch.StopwatchFragment;
 
-import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static String[] toxa16 = {"0", "1", "2", "3", "4"};
-    public static String[] romans = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+    TimeManager timeManager = new TimeManager(this);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications, R.id.navigation_romans)
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications,
+                R.id.navigation_romans, R.id.navigation_stopwatch)
                 .build();
         final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -61,66 +61,39 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-    @SuppressLint("SimpleDateFormat")
-    private void getDate(){
-        int hours =  Calendar.getInstance().getTime().getHours();
-        int minutes = Calendar.getInstance().getTime().getMinutes();
-        int seconds = Calendar.getInstance().getTime().getSeconds();
-
-
-        toxa16[0] = "Time in binary:" + "\n"
-                + Integer.toString(hours, 2) + "\n"
-                + Integer.toString(minutes, 2) + "\n"
-                + Integer.toString(seconds, 2) + "\n";
-
-        toxa16[1] =  "Time in decimal:" + "\n"
-                + Integer.toString(hours, 10) + ":"
-                + Integer.toString(minutes, 10) + ":"
-                + Integer.toString(seconds, 10) + "\n";
-
-        toxa16[2] =  "Time in hex:" + "\n"
-                + Integer.toString(hours, 16) + ":"
-                + Integer.toString(minutes, 16) + ":"
-                + Integer.toString(seconds, 16) + "\n";
-
-        toxa16[3] = "Time in Roman:" + "\n"
-                + intToRomans(hours) + "\n"
-                + intToRomans(minutes) + "\n"
-                + intToRomans(seconds) + "\n";
-
-    }
-
     private void updateTime(){
-        getDate();
+        timeManager.getDate();
         Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+        String prefix = getStrFromResource(R.string.time_in) + " ";
         if(navHostFragment != null && navHostFragment.getChildFragmentManager() != null) {
             List<Fragment> fragmentList = navHostFragment.getChildFragmentManager().getFragments();
             for (Fragment fragment : fragmentList) {
                 if (fragment instanceof HomeFragment) {
                     HomeFragment s = (HomeFragment) fragment;
-                    s.homeViewModel.setmText(toxa16[0]);
+                    s.homeViewModel.setmText(prefix + getStrFromResource(R.string.title_binary) + "\n" + timeManager.binary);
                     break;
                 } else if (fragment instanceof DashboardFragment) {
                     DashboardFragment s = (DashboardFragment) fragment;
-                    s.dashboardViewModel.setmText(toxa16[1]);
+                    s.dashboardViewModel.setmText(prefix  + getStrFromResource(R.string.title_decimal) + "\n" + timeManager.decimal);
                     break;
                 } else if (fragment instanceof NotificationsFragment) {
                     NotificationsFragment s = (NotificationsFragment) fragment;
-                    s.notificationsViewModel.setmText(toxa16[2]);
+                    s.notificationsViewModel.setmText(prefix + getStrFromResource(R.string.title_hex) + "\n" + timeManager.hex);
                     break;
                 } else if (fragment instanceof RomansFragment) {
                     RomansFragment s = (RomansFragment) fragment;
-                    s.romansViewModel.setmText(toxa16[3]);
+                    s.romansViewModel.setmText(prefix + getStrFromResource(R.string.title_romans) + "\n" + timeManager.roman);
                     break;
+                } else if (fragment instanceof StopwatchFragment) {
+                    StopwatchFragment s = (StopwatchFragment) fragment;
+                    s.increaseCounterByOne(timeManager);
                 }
             }
         }
     }
 
-    private String intToRomans(int i) {
-        // can convert int into romans from 0 to 99
-        return romans[(i % 100) / 10 + 10] + romans[i % 10];
+    public String getStrFromResource(int r){
+        return getResources().getString(r);
     }
 
 }

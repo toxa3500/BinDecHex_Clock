@@ -8,19 +8,19 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.example.bindechexclock.ui.home.HomeFragment"
-        android:label="@string/title_home"
+        android:label="@string/title_binary"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.example.bindechexclock.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
+        android:label="@string/title_decimal"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.example.bindechexclock.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
+        android:label="@string/title_hex"
         tools:layout="@layout/fragment_notifications" />
 
     <fragment
@@ -28,5 +28,11 @@
         android:name="com.example.bindechexclock.ui.romans.RomansFragment"
         android:label="@string/title_romans"
         tools:layout="@layout/fragment_romans" />
+
+    <fragment
+        android:id="@+id/navigation_stopwatch"
+        android:name="com.example.bindechexclock.ui.stopwatch.StopwatchFragment"
+        android:label="@string/title_stopwatch"
+        tools:layout="@layout/fragment_stopwatch" />
 
 </navigation>

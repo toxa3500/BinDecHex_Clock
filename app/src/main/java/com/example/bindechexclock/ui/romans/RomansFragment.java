@@ -21,8 +21,8 @@ public class RomansFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         romansViewModel =
                 ViewModelProviders.of(this).get(RomansViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_notifications, container, false);
-        final TextView textView = root.findViewById(R.id.text_notifications);
+        View root = inflater.inflate(R.layout.fragment_romans, container, false);
+        final TextView textView = root.findViewById(R.id.text_romans);
         romansViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
