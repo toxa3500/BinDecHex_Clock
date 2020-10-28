@@ -75,19 +75,19 @@ public class TimeManager {
         return romans[(i % 100) / 10 + 10] + romans[i % 10];
     }
 
-    public String getTimeStringFromInt(int time) {
+    public String[] getTimeStringFromInt(int time) {
         int hours = time / 3600;
         int minutes = time % 3600 / 60;
         int seconds = time % 60;
 
-        return getStrFromResource(R.string.title_binary) + "\n" +
-                getTimeInString(hours, minutes, seconds, 2) + "\n" +
+        return new String[]{getStrFromResource(R.string.title_binary) + "\n" +
+                getTimeInString(hours, minutes, seconds, 2) + "\n",
                 getStrFromResource(R.string.title_decimal) + "  ->  " +
-                getTimeInString(hours, minutes, seconds, 10) + "\n" +
+                getTimeInString(hours, minutes, seconds, 10) + "\n",
                 getStrFromResource(R.string.title_hex) + "  ->  " +
-                getTimeInString(hours, minutes, seconds, 16) + "\n" +
+                getTimeInString(hours, minutes, seconds, 16) + "\n",
                 getStrFromResource(R.string.title_romans) + "\n" +
-                getTimeInString(hours, minutes, seconds, 20);
+                getTimeInString(hours, minutes, seconds, 20)};
 
     }
 
