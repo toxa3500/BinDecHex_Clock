@@ -2,21 +2,12 @@ package com.example.bindechexclock;
 
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-
-import com.example.bindechexclock.ui.dashboard.DashboardFragment;
-import com.example.bindechexclock.ui.home.HomeFragment;
-import com.example.bindechexclock.ui.notifications.NotificationsFragment;
-import com.example.bindechexclock.ui.romans.RomansFragment;
-import com.example.bindechexclock.ui.stopwatch.StopwatchFragment;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -48,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                updateTime();
+                                timeManager.updateTime();
                             }
                         });
                     }
@@ -60,40 +51,4 @@ public class MainActivity extends AppCompatActivity {
         t.start();
 
     }
-
-    private void updateTime(){
-        timeManager.getDate();
-        Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
-        String prefix = getStrFromResource(R.string.time_in) + " ";
-        if(navHostFragment != null && navHostFragment.getChildFragmentManager() != null) {
-            List<Fragment> fragmentList = navHostFragment.getChildFragmentManager().getFragments();
-            for (Fragment fragment : fragmentList) {
-                if (fragment instanceof HomeFragment) {
-                    HomeFragment s = (HomeFragment) fragment;
-                    s.homeViewModel.setmText(prefix + getStrFromResource(R.string.title_binary) + "\n" + timeManager.binary);
-                    break;
-                } else if (fragment instanceof DashboardFragment) {
-                    DashboardFragment s = (DashboardFragment) fragment;
-                    s.dashboardViewModel.setmText(prefix  + getStrFromResource(R.string.title_decimal) + "\n" + timeManager.decimal);
-                    break;
-                } else if (fragment instanceof NotificationsFragment) {
-                    NotificationsFragment s = (NotificationsFragment) fragment;
-                    s.notificationsViewModel.setmText(prefix + getStrFromResource(R.string.title_hex) + "\n" + timeManager.hex);
-                    break;
-                } else if (fragment instanceof RomansFragment) {
-                    RomansFragment s = (RomansFragment) fragment;
-                    s.romansViewModel.setmText(prefix + getStrFromResource(R.string.title_romans) + "\n" + timeManager.roman);
-                    break;
-                } else if (fragment instanceof StopwatchFragment) {
-                    StopwatchFragment s = (StopwatchFragment) fragment;
-                    s.increaseCounterByOne(timeManager);
-                }
-            }
-        }
-    }
-
-    public String getStrFromResource(int r){
-        return getResources().getString(r);
-    }
-
 }

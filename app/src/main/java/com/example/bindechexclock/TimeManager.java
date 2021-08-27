@@ -1,8 +1,16 @@
 package com.example.bindechexclock;
 
 import android.annotation.SuppressLint;
+import android.support.v4.app.Fragment;
+
+import com.example.bindechexclock.ui.dashboard.DashboardFragment;
+import com.example.bindechexclock.ui.home.HomeFragment;
+import com.example.bindechexclock.ui.notifications.NotificationsFragment;
+import com.example.bindechexclock.ui.romans.RomansFragment;
+import com.example.bindechexclock.ui.stopwatch.StopwatchFragment;
 
 import java.util.Calendar;
+import java.util.List;
 
 
 public class TimeManager {
@@ -93,6 +101,37 @@ public class TimeManager {
 
     public String getStrFromResource(int r){
         return mainActivity.getResources().getString(r);
+    }
+
+    public void updateTime(){
+        this.getDate();
+        Fragment navHostFragment = mainActivity.getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+        String prefix = getStrFromResource(R.string.time_in) + " ";
+        if(navHostFragment != null && navHostFragment.getChildFragmentManager() != null) {
+            List<Fragment> fragmentList = navHostFragment.getChildFragmentManager().getFragments();
+            for (Fragment fragment : fragmentList) {
+                if (fragment instanceof HomeFragment) {
+                    HomeFragment s = (HomeFragment) fragment;
+                    s.homeViewModel.setmText(prefix + getStrFromResource(R.string.title_binary) + "\n" + this.binary);
+                    break;
+                } else if (fragment instanceof DashboardFragment) {
+                    DashboardFragment s = (DashboardFragment) fragment;
+                    s.dashboardViewModel.setmText(prefix  + getStrFromResource(R.string.title_decimal) + "\n" + this.decimal);
+                    break;
+                } else if (fragment instanceof NotificationsFragment) {
+                    NotificationsFragment s = (NotificationsFragment) fragment;
+                    s.notificationsViewModel.setmText(prefix + getStrFromResource(R.string.title_hex) + "\n" + this.hex);
+                    break;
+                } else if (fragment instanceof RomansFragment) {
+                    RomansFragment s = (RomansFragment) fragment;
+                    s.romansViewModel.setmText(prefix + getStrFromResource(R.string.title_romans) + "\n" + this.roman);
+                    break;
+                } else if (fragment instanceof StopwatchFragment) {
+                    StopwatchFragment s = (StopwatchFragment) fragment;
+                    s.increaseCounterByOne(this);
+                }
+            }
+        }
     }
 
 }
