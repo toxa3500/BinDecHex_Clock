@@ -3,7 +3,7 @@
 workflows:
   android-debug-build:
     name: "Android Debug Build"
-    instance_type: linux_x2 # Using Linux instance for Android builds
+    instance_type: mac_mini_m2 # Using macOS M2 instance
 
     environment:
       java: 17 # Specify Java version; AGP 8+ (used with targetSdk 34) requires JDK 17
