@@ -3,17 +3,26 @@
 
     <item
         android:id="@+id/navigation_home"
-        android:icon="@drawable/ic_home_black_24dp"
-        android:title="@string/title_home" />
+        android:icon="@drawable/ic_baseline_exposure_zero_24"
+        android:title="@string/title_binary" />
 
     <item
         android:id="@+id/navigation_dashboard"
-        android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="@string/title_dashboard" />
+        android:icon="@drawable/ic_baseline_timer_10_24"
+        android:title="@string/title_decimal" />
 
     <item
         android:id="@+id/navigation_notifications"
-        android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="@string/title_notifications" />
+        android:icon="@drawable/ic_baseline_snooze_24"
+        android:title="@string/title_hex" />
+
+    <item
+        android:id="@+id/navigation_romans"
+        android:icon="@drawable/ic_baseline_whatshot_24"
+        android:title="@string/title_romans" />
+    <item
+        android:id="@+id/navigation_stopwatch"
+        android:icon="@drawable/ic_baseline_update_24"
+        android:title="@string/title_stopwatch" />
 
 </menu>

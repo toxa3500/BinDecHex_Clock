@@ -1,16 +1,16 @@
-package com.example.bindechexclock.ui.notifications;
+package com.example.bindechexclock.ui.stopwatch;
 
 import androidx.lifecycle.LiveData; // Changed
 import androidx.lifecycle.MutableLiveData; // Changed
 import androidx.lifecycle.ViewModel; // Changed
 
-public class NotificationsViewModel extends ViewModel {
+public class StopwatchViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public NotificationsViewModel() {
+    public StopwatchViewModel() {
         mText = new MutableLiveData<>();
-        // mText.setValue("This is notifications fragment"); // Default text removed
+        // mText.setValue("00:00:00"); // Initial display text, will be set by Fragment
     }
 
     public LiveData<String> getText() {

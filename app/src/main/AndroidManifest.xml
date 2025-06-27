@@ -4,14 +4,16 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_baseline_snooze_24"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
+            android:exported="true"
             android:label="@string/app_name">
+            <!-- The android:exported="true" above is required for Android 12+ if the activity has an intent-filter. -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

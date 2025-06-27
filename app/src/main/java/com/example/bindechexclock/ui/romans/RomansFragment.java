@@ -1,4 +1,4 @@
-package com.example.bindechexclock.ui.notifications;
+package com.example.bindechexclock.ui.romans;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,18 +17,18 @@ import com.example.bindechexclock.MainActivity;
 import com.example.bindechexclock.R;
 import com.example.bindechexclock.TimeManager;
 
-public class NotificationsFragment extends Fragment {
+public class RomansFragment extends Fragment {
 
-    private NotificationsViewModel notificationsViewModel; // Changed to private
+    private RomansViewModel romansViewModel; // Changed to private
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        notificationsViewModel =
-                new ViewModelProvider(this).get(NotificationsViewModel.class); // Changed
-        View root = inflater.inflate(R.layout.fragment_notifications, container, false);
-        final TextView textView = root.findViewById(R.id.text_notifications);
-        notificationsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        romansViewModel =
+                new ViewModelProvider(this).get(RomansViewModel.class); // Changed
+        View root = inflater.inflate(R.layout.fragment_romans, container, false);
+        final TextView textView = root.findViewById(R.id.text_romans);
+        romansViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);
@@ -44,13 +44,11 @@ public class NotificationsFragment extends Fragment {
             MainActivity mainActivity = (MainActivity) getActivity();
             TimeManager timeManager = mainActivity.getTimeManager();
 
-            timeManager.getHexTimeLiveData().observe(getViewLifecycleOwner(), new Observer<String>() {
+            timeManager.getRomanTimeLiveData().observe(getViewLifecycleOwner(), new Observer<String>() {
                 @Override
-                public void onChanged(String hexTimeValue) {
-                    // The old TimeManager used "  ->  " for hex, let's replicate that.
-                    // String prefix = getString(R.string.time_in) + " " + getString(R.string.title_hex) + "\n";
-                    String prefix = getString(R.string.time_in) + " " + getString(R.string.title_hex) + "  ->  ";
-                    notificationsViewModel.setmText(prefix + hexTimeValue); // hexTimeValue likely includes \n
+                public void onChanged(String romanTimeValue) {
+                    String prefix = getString(R.string.time_in) + " " + getString(R.string.title_romans) + "\n";
+                    romansViewModel.setmText(prefix + romanTimeValue);
                 }
             });
         }
