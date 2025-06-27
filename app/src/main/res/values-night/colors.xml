@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Theme Colors -->
+    <color name="colorPrimary">#BB86FC</color> <!-- Lighter purple for dark theme -->
+    <color name="colorPrimaryVariant">#BB86FC</color> <!-- Can be same as primary or slightly different for dark theme -->
+    <color name="colorSecondary">#03DAC5</color> <!-- Teal, often used as-is in dark themes if contrast allows -->
+
+    <!-- Text/icon colors on top of primary/secondary -->
+    <color name="colorOnPrimary">#000000</color> <!-- Black text on lighter purple -->
+    <color name="colorOnSecondary">#000000</color> <!-- Black text on teal -->
+
+    <!-- Standard background and surface colors for dark theme -->
+    <color name="colorBackground">#121212</color> <!-- Standard dark background -->
+    <color name="colorSurface">#121212</color>    <!-- Standard dark surface (or slightly lighter like #1E1E1E if needed) -->
+
+    <!-- Text/icon colors on top of background/surface -->
+    <color name="colorOnBackground">#FFFFFF</color> <!-- White text on dark background -->
+    <color name="colorOnSurface">#FFFFFF</color>    <!-- White text on dark surface -->
+
+    <!-- Specific text colors for dark theme -->
+    <color name="textColorPrimary">#FFFFFFFF</color> <!-- White for primary text -->
+    <color name="textColorSecondary">#B3FFFFFF</color> <!-- 70% white for secondary text -->
+</resources>
