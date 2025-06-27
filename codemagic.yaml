@@ -1,0 +1,37 @@
+# Basic Codemagic YAML configuration for an Android (Java/Gradle) project
+
+workflows:
+  android-debug-build:
+    name: "Android Debug Build"
+    instance_type: linux_x2 # Using Linux instance for Android builds
+
+    environment:
+      java: 17 # Specify Java version; AGP 8+ (used with targetSdk 34) requires JDK 17
+
+    cache: # Optional: Caching Gradle dependencies
+      cache_paths:
+        - ~/.gradle/caches
+        - ~/.gradle/wrapper # Cache Gradle wrapper downloads
+
+    triggering: # Basic trigger: run on push to any branch
+      events:
+        - push
+      branch_patterns:
+        - pattern: '*' # Match all branches
+          include: true
+
+    scripts:
+      - name: "Set execute permissions for gradlew"
+        script: |
+          chmod +x ./gradlew
+      - name: "Clean project"
+        script: |
+          ./gradlew clean
+      - name: "Build debug APK"
+        script: |
+          ./gradlew :app:assembleDebug # Specify module :app: explicitly
+
+    artifacts:
+      - app/build/outputs/apk/debug/*.apk
+      - app/build/reports/** # Collect build reports
+      - app/build/test-results/** # Collect test results if any tests were run
