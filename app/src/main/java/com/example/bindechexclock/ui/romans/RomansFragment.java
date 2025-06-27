@@ -5,22 +5,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider; // Changed
+import androidx.annotation.Nullable; // Added for onViewCreated
+import android.os.Bundle; // Added for onViewCreated
 
+import com.example.bindechexclock.MainActivity;
 import com.example.bindechexclock.R;
+import com.example.bindechexclock.TimeManager;
 
 public class RomansFragment extends Fragment {
 
-    public RomansViewModel romansViewModel;
+    private RomansViewModel romansViewModel; // Changed to private
 
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         romansViewModel =
-                ViewModelProviders.of(this).get(RomansViewModel.class);
+                new ViewModelProvider(this).get(RomansViewModel.class); // Changed
         View root = inflater.inflate(R.layout.fragment_romans, container, false);
         final TextView textView = root.findViewById(R.id.text_romans);
         romansViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -30,5 +35,22 @@ public class RomansFragment extends Fragment {
             }
         });
         return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (getActivity() instanceof MainActivity) {
+            MainActivity mainActivity = (MainActivity) getActivity();
+            TimeManager timeManager = mainActivity.getTimeManager();
+
+            timeManager.getRomanTimeLiveData().observe(getViewLifecycleOwner(), new Observer<String>() {
+                @Override
+                public void onChanged(String romanTimeValue) {
+                    String prefix = getString(R.string.time_in) + " " + getString(R.string.title_romans) + "\n";
+                    romansViewModel.setmText(prefix + romanTimeValue);
+                }
+            });
+        }
     }
 }

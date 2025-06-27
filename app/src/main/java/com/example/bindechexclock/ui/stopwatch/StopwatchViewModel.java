@@ -1,8 +1,8 @@
 package com.example.bindechexclock.ui.stopwatch;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
+import androidx.lifecycle.LiveData; // Changed
+import androidx.lifecycle.MutableLiveData; // Changed
+import androidx.lifecycle.ViewModel; // Changed
 
 public class StopwatchViewModel extends ViewModel {
 
@@ -10,6 +10,7 @@ public class StopwatchViewModel extends ViewModel {
 
     public StopwatchViewModel() {
         mText = new MutableLiveData<>();
+        // mText.setValue("00:00:00"); // Initial display text, will be set by Fragment
     }
 
     public LiveData<String> getText() {

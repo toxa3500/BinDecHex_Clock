@@ -1,137 +1,107 @@
 package com.example.bindechexclock;
 
 import android.annotation.SuppressLint;
-import android.support.v4.app.Fragment;
-
-import com.example.bindechexclock.ui.dashboard.DashboardFragment;
-import com.example.bindechexclock.ui.home.HomeFragment;
-import com.example.bindechexclock.ui.notifications.NotificationsFragment;
-import com.example.bindechexclock.ui.romans.RomansFragment;
-import com.example.bindechexclock.ui.stopwatch.StopwatchFragment;
+// Import LiveData and MutableLiveData (assuming AndroidX)
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import java.util.Calendar;
-import java.util.List;
-
 
 public class TimeManager {
 
-    public static String[] romans = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+    public static final String[] ROMANS_LOOKUP = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
 
-    public String binary;
-    public String decimal;
-    public String hex;
-    public String roman;
-    MainActivity mainActivity;
+    private final MutableLiveData<String> binaryTimeLiveData = new MutableLiveData<>();
+    private final MutableLiveData<String> decimalTimeLiveData = new MutableLiveData<>();
+    private final MutableLiveData<String> hexTimeLiveData = new MutableLiveData<>();
+    private final MutableLiveData<String> romanTimeLiveData = new MutableLiveData<>();
 
-    public TimeManager(MainActivity mainActivity){
-        binary = "";
-        decimal = "";
-        hex = "";
-        roman = "";
-        this.mainActivity = mainActivity;
+    // Public getters for the LiveData (Fragments/ViewModels will observe these)
+    public LiveData<String> getBinaryTimeLiveData() { return binaryTimeLiveData; }
+    public LiveData<String> getDecimalTimeLiveData() { return decimalTimeLiveData; }
+    public LiveData<String> getHexTimeLiveData() { return hexTimeLiveData; }
+    public LiveData<String> getRomanTimeLiveData() { return romanTimeLiveData; }
 
+    public TimeManager() {
+        // Initialize with current time or default values
+        updateTime();
     }
 
-
-    @SuppressLint("SimpleDateFormat")
-    public void getDate(){
+    // Renamed from getDate to avoid confusion, this is the main update method
+    public void updateTime() {
         int hours = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         int minutes = Calendar.getInstance().get(Calendar.MINUTE);
         int seconds = Calendar.getInstance().get(Calendar.SECOND);
 
-
-        binary = getTimeInString(hours, minutes, seconds, 2);
-        decimal = getTimeInString(hours, minutes, seconds, 10);
-        hex = getTimeInString(hours, minutes, seconds, 16);
-        roman = getTimeInString(hours, minutes, seconds, 20);
-
+        // PostValue is used if this method can be called from a background thread.
+        // If always called from the main thread (as with the Handler in MainActivity),
+        // setValue() can be used. Using postValue for safety.
+        binaryTimeLiveData.postValue(formatTimePart(hours, 2) + "\n" + formatTimePart(minutes, 2) + "\n" + formatTimePart(seconds, 2));
+        decimalTimeLiveData.postValue(formatTimePart(hours, 10) + ":" + formatTimePart(minutes, 10) + ":" + formatTimePart(seconds, 10));
+        hexTimeLiveData.postValue(formatTimePart(hours, 16) + ":" + formatTimePart(minutes, 16) + ":" + formatTimePart(seconds, 16));
+        romanTimeLiveData.postValue(intToRomans(hours) + "\n" + intToRomans(minutes) + "\n" + intToRomans(seconds));
     }
 
-    private String getTimeInString (int hours, int minutes, int seconds, int radix) {
-        switch (radix)
-        {
-//            return time in binary
-            case 2:
-                return Integer.toString(hours, 2) + "\n"
-                        + Integer.toString(minutes, 2) + "\n"
-                        + Integer.toString(seconds, 2) + "\n";
-//            return time in decimal
-            case 10:
-                return  Integer.toString(hours, 10) + ":"
-                        + Integer.toString(minutes, 10) + ":"
-                        + Integer.toString(seconds, 10) + "\n";
-//            return time in hex
-            case 16:
-                return Integer.toString(hours, 16) + ":"
-                        + Integer.toString(minutes, 16) + ":"
-                        + Integer.toString(seconds, 16) + "\n";
-//            return time in roman
-            case 20:
-                return intToRomans(hours) + "\n"
-                        + intToRomans(minutes) + "\n"
-                        + intToRomans(seconds) + "\n";
-            default:
-                return "null";
-        }
-    }
-
-    private String intToRomans(int i) {
-        // can convert int into romans from 0 to 99
-        if (i == 0) {
-            return "0";
-        }
-        return romans[(i % 100) / 10 + 10] + romans[i % 10];
-    }
-
-    public String[] getTimeStringFromInt(int time) {
-        int hours = time / 3600;
-        int minutes = time % 3600 / 60;
-        int seconds = time % 60;
-
-        return new String[]{getStrFromResource(R.string.title_binary) + "\n" +
-                getTimeInString(hours, minutes, seconds, 2) + "\n",
-                getStrFromResource(R.string.title_decimal) + "  ->  " +
-                getTimeInString(hours, minutes, seconds, 10) + "\n",
-                getStrFromResource(R.string.title_hex) + "  ->  " +
-                getTimeInString(hours, minutes, seconds, 16) + "\n",
-                getStrFromResource(R.string.title_romans) + "\n" +
-                getTimeInString(hours, minutes, seconds, 20)};
-
-    }
-
-    public String getStrFromResource(int r){
-        return mainActivity.getResources().getString(r);
-    }
-
-    public void updateTime(){
-        this.getDate();
-        Fragment navHostFragment = mainActivity.getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
-        String prefix = getStrFromResource(R.string.time_in) + " ";
-        if(navHostFragment != null && navHostFragment.getChildFragmentManager() != null) {
-            List<Fragment> fragmentList = navHostFragment.getChildFragmentManager().getFragments();
-            for (Fragment fragment : fragmentList) {
-                if (fragment instanceof HomeFragment) {
-                    HomeFragment s = (HomeFragment) fragment;
-                    s.homeViewModel.setmText(prefix + getStrFromResource(R.string.title_binary) + "\n" + this.binary);
-                    break;
-                } else if (fragment instanceof DashboardFragment) {
-                    DashboardFragment s = (DashboardFragment) fragment;
-                    s.dashboardViewModel.setmText(prefix  + getStrFromResource(R.string.title_decimal) + "\n" + this.decimal);
-                    break;
-                } else if (fragment instanceof NotificationsFragment) {
-                    NotificationsFragment s = (NotificationsFragment) fragment;
-                    s.notificationsViewModel.setmText(prefix + getStrFromResource(R.string.title_hex) + "\n" + this.hex);
-                    break;
-                } else if (fragment instanceof RomansFragment) {
-                    RomansFragment s = (RomansFragment) fragment;
-                    s.romansViewModel.setmText(prefix + getStrFromResource(R.string.title_romans) + "\n" + this.roman);
-                    break;
-                } else if (fragment instanceof StopwatchFragment) {
-                    StopwatchFragment s = (StopwatchFragment) fragment;
-                    s.increaseCounterByOne(this);
+    // Renamed from getTimeInString to be more specific, and simplified.
+    // This method now just formats a single integer part of the time.
+    private String formatTimePart(int timePart, int radix) {
+        if (radix == 2 || radix == 10 || radix == 16) {
+            String value = Integer.toString(timePart, radix);
+            if (radix == 10 || radix == 16) { // Pad decimal and hex for consistent two digits
+                if (timePart < radix && timePart < 10 && value.length() < 2) { // for hex, 10-15 are single char A-F
+                     if (timePart < 10) return "0" + value; // only pad if less than 10 for hex
+                }
+                 if (radix == 10 && value.length() < 2) { // Pad for decimal
+                    return "0" + value;
                 }
             }
+            return value.toUpperCase(); // Hex values are typically uppercase
         }
+        return "N/A"; // Should not happen with current usage
     }
 
+
+    // Made static as it doesn't depend on instance state.
+    public static String intToRomans(int i) {
+        if (i < 0 || i > 99) { // Added basic validation
+            // Or handle more gracefully, e.g., return "N/A" or throw exception
+            return (i == 0) ? "0" : "??"; // Handle 0 explicitly if needed, or invalid for others
+        }
+        if (i == 0) {
+            return "0"; // Common request for 0 seconds/minutes
+        }
+        return ROMANS_LOOKUP[(i % 100) / 10 + 10] + ROMANS_LOOKUP[i % 10];
+    }
+
+    /**
+     * Formats a total number of seconds into H:M:S components for different radices.
+     * This method is now static and does not rely on instance members like mainActivity.
+     * It returns an array of strings: [binary, decimal, hex, roman].
+     * The calling code (e.g., StopwatchViewModel) will be responsible for adding prefixes or labels.
+     */
+    public static String[] formatDurationStrings(int totalSeconds) {
+        if (totalSeconds < 0) totalSeconds = 0;
+        int hours = totalSeconds / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
+
+        String binaryStr = formatSingleUnit(hours, 2) + "\n" + formatSingleUnit(minutes, 2) + "\n" + formatSingleUnit(seconds, 2);
+        String decimalStr = formatSingleUnit(hours, 10) + ":" + formatSingleUnit(minutes, 10) + ":" + formatSingleUnit(seconds, 10);
+        String hexStr = formatSingleUnit(hours, 16) + ":" + formatSingleUnit(minutes, 16) + ":" + formatSingleUnit(seconds, 16);
+        String romanStr = intToRomans(hours) + "\n" + intToRomans(minutes) + "\n" + intToRomans(seconds);
+
+        return new String[]{binaryStr, decimalStr, hexStr, romanStr};
+    }
+
+    // Helper for formatDurationStrings, similar to formatTimePart but static.
+    private static String formatSingleUnit(int unit, int radix) {
+        // Simplified version for stopwatch display, may need padding logic like formatTimePart
+        String value = Integer.toString(unit, radix);
+        if ((radix == 10 || radix == 16) && unit < 10 && value.length() < 2) {
+             if (radix == 10 || (radix == 16 && unit < 10)) { // Pad for decimal and hex single digits
+                 return "0" + value;
+             }
+        }
+        return value.toUpperCase();
+    }
 }

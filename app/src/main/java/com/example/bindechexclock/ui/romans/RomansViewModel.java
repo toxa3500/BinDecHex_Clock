@@ -1,15 +1,16 @@
 package com.example.bindechexclock.ui.romans;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
+import androidx.lifecycle.LiveData; // Changed
+import androidx.lifecycle.MutableLiveData; // Changed
+import androidx.lifecycle.ViewModel; // Changed
 
-public class RomansViewModel extends ViewModel{
+public class RomansViewModel extends ViewModel { // Corrected class declaration, was ViewModel{
 
     private MutableLiveData<String> mText;
 
     public RomansViewModel() {
         mText = new MutableLiveData<>();
+        // mText.setValue("This is romans fragment"); // Default text removed
     }
 
     public LiveData<String> getText() {

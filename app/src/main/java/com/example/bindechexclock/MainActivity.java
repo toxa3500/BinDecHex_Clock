@@ -1,8 +1,10 @@
 package com.example.bindechexclock;
 
 import android.os.Bundle;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.AppCompatActivity;
+import android.os.Handler;
+import android.os.Looper;
+import androidx.appcompat.app.AppCompatActivity; // Changed
+import com.google.android.material.bottomnavigation.BottomNavigationView; // Changed
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -11,8 +13,11 @@ import androidx.navigation.ui.NavigationUI;
 
 public class MainActivity extends AppCompatActivity {
 
-    TimeManager timeManager = new TimeManager(this);
+    TimeManager timeManager = new TimeManager(); // Changed: Removed 'this'
 
+    private Handler handler;
+    private Runnable updateTimeRunnable;
+    private static final long UPDATE_INTERVAL_MS = 1000; // 1 second
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,26 +34,31 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
-        Thread t = new Thread() {
-
+        handler = new Handler(Looper.getMainLooper());
+        updateTimeRunnable = new Runnable() {
             @Override
             public void run() {
-                try {
-                    while (!isInterrupted()) {
-                        Thread.sleep(1000);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                timeManager.updateTime();
-                            }
-                        });
-                    }
-                } catch (InterruptedException ignored) {
-                }
+                timeManager.updateTime();
+                handler.postDelayed(this, UPDATE_INTERVAL_MS);
             }
         };
+    }
 
-        t.start();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Start the periodic updates when the activity becomes visible
+        handler.post(updateTimeRunnable);
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Stop the periodic updates when the activity is no longer visible
+        handler.removeCallbacks(updateTimeRunnable);
+    }
+
+    public TimeManager getTimeManager() {
+        return timeManager;
     }
 }

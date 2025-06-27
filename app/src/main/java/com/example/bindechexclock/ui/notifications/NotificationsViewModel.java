@@ -1,8 +1,8 @@
 package com.example.bindechexclock.ui.notifications;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
+import androidx.lifecycle.LiveData; // Changed
+import androidx.lifecycle.MutableLiveData; // Changed
+import androidx.lifecycle.ViewModel; // Changed
 
 public class NotificationsViewModel extends ViewModel {
 
@@ -10,6 +10,7 @@ public class NotificationsViewModel extends ViewModel {
 
     public NotificationsViewModel() {
         mText = new MutableLiveData<>();
+        // mText.setValue("This is notifications fragment"); // Default text removed
     }
 
     public LiveData<String> getText() {
