@@ -24,7 +24,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    namespace 'com.example.bindechexclock' // Required for AGP 8+ and targetSdk 34
+    // namespace 'com.example.bindechexclock' // Removed: Not supported by AGP 4.0.1
 }
 
 dependencies {
