@@ -6,7 +6,7 @@ workflows:
     instance_type: mac_mini_m2 # Using macOS M2 instance
 
     environment:
-      java: 17 # Specify Java version; AGP 8+ (used with targetSdk 34) requires JDK 17
+      java: 11 # Changed from 17 to 11 for compatibility with Gradle 6.1.1
 
     cache: # Optional: Caching Gradle dependencies
       cache_paths:
@@ -24,6 +24,9 @@ workflows:
       - name: "Set execute permissions for gradlew"
         script: |
           chmod +x ./gradlew
+      - name: "Stop existing Gradle daemons (if any)"
+        script: |
+          ./gradlew --stop
       - name: "Clean project"
         script: |
           ./gradlew clean
