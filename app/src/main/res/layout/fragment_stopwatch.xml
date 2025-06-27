@@ -42,4 +42,4 @@
         app:layout_constraintRight_toLeftOf="@id/buttonStartStop"
         app:layout_constraintLeft_toLeftOf="parent"/>
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
