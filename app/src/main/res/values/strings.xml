@@ -9,4 +9,11 @@
     <string name="stop">Stop</string>
     <string name="reset">Reset</string>
     <string name="time_in">Time in</string>
+
+    <!-- Stopwatch/Timer Hybrid Feature Strings -->
+    <string name="timer_mode_button">Timer</string>
+    <string name="stopwatch_mode_button">Stopwatch</string>
+    <string name="action_bar_title_timer">Timer</string>
+    <string name="plus_30_seconds">+ 30 s</string>
+    <string name="minus_30_seconds">- 30 s</string>
 </resources>

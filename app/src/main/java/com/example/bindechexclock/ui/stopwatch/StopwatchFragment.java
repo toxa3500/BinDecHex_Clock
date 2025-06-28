@@ -1,18 +1,25 @@
 package com.example.bindechexclock.ui.stopwatch;
 
-import androidx.lifecycle.ViewModelProvider;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import androidx.lifecycle.Observer; // Added for observing LiveData
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bindechexclock.R;
 import com.example.bindechexclock.TimeManager;
@@ -21,14 +28,20 @@ public class StopwatchFragment extends Fragment {
 
     private StopwatchViewModel stopwatchViewModel;
 
-    private boolean startStopState = false; // true if stopwatch is running
-    private int counter = 0; // Current stopwatch time in seconds
-    private int pauseValue = 0; // Stores counter value when paused
-    private char presentationType = 'a'; // 'b'inary, 'd'ecimal, 'h'ex, 'r'oman, 'a'll
+    private boolean startStopState = false; // true if stopwatch/timer is running
+    private int counter = 0; // Current stopwatch/timer time in seconds
+    private int pauseValue = 0; // Stores counter value when paused (mainly for stopwatch)
+    private char presentationType = 'd'; // Default to decimal: 'b'inary, 'd'ecimal, 'h'ex, 'r'oman, 'a'll
+    private boolean isTimerMode = false; // false = Stopwatch, true = Timer
 
     private Handler stopwatchHandler;
     private Runnable stopwatchRunnable;
-    private static final long UPDATE_INTERVAL_MS = 1000; // 1 second, can be adjusted for stopwatch precision
+    private static final long UPDATE_INTERVAL_MS = 1000;
+
+    private Button buttonPlus30, buttonMinus30, buttonModeToggle;
+    private Button startStopButton; // Keep reference for text update
+    private TextView textViewStopwatch;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,11 +50,28 @@ public class StopwatchFragment extends Fragment {
         stopwatchRunnable = new Runnable() {
             @Override
             public void run() {
-                if (startStopState) {
+                if (!startStopState) return;
+
+                if (isTimerMode) { // Timer Mode
+                    if (counter > 0) {
+                        counter--;
+                    }
+                    if (counter <= 0) {
+                        counter = 0;
+                        startStopState = false; // Stop the timer
+                        if (startStopButton != null) {
+                            startStopButton.setText(R.string.start);
+                        }
+                        playAlarmSound();
+                        updateStopwatchDisplay(); // Show 00:00:00
+                        // Do not re-post runnable
+                        return;
+                    }
+                } else { // Stopwatch Mode
                     counter++;
-                    updateStopwatchDisplay();
-                    stopwatchHandler.postDelayed(this, UPDATE_INTERVAL_MS);
                 }
+                updateStopwatchDisplay();
+                stopwatchHandler.postDelayed(this, UPDATE_INTERVAL_MS);
             }
         };
     }
@@ -51,48 +81,62 @@ public class StopwatchFragment extends Fragment {
                              final ViewGroup container, Bundle savedInstanceState) {
         stopwatchViewModel = new ViewModelProvider(this).get(StopwatchViewModel.class);
         View root = inflater.inflate(R.layout.fragment_stopwatch, container, false);
-        final TextView textView = root.findViewById(R.id.text_stopwatch);
-        final Button startStopButton = root.findViewById(R.id.buttonStartStop);
+
+        textViewStopwatch = root.findViewById(R.id.text_stopwatch);
+        startStopButton = root.findViewById(R.id.buttonStartStop);
         final Button resetButton = root.findViewById(R.id.buttonReset);
 
-        updateStopwatchDisplay(); // Initial display
+        buttonPlus30 = root.findViewById(R.id.button_plus_30);
+        buttonMinus30 = root.findViewById(R.id.button_minus_30);
+        buttonModeToggle = root.findViewById(R.id.button_mode_toggle);
 
-        textView.setOnClickListener(v -> {
+        return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        updateTitleAndModeButton(); // Set initial title and button text
+        updateStopwatchDisplay();    // Initial display
+
+        textViewStopwatch.setOnClickListener(v -> {
             switch (presentationType) {
                 case 'h': presentationType = 'r'; break;
                 case 'd': presentationType = 'h'; break;
                 case 'b': presentationType = 'd'; break;
                 case 'a': presentationType = 'b'; break;
-                default: presentationType = 'a';
+                default: presentationType = 'd'; // Default to decimal if cycle is broken
             }
-            updateStopwatchDisplay(); // Update display with new presentation type
+            updateStopwatchDisplay();
         });
 
-        stopwatchViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                textView.setText(s);
-            }
-        });
-
-        startStopButton.setText(R.string.start);
-        resetButton.setText(R.string.reset);
+        stopwatchViewModel.getText().observe(getViewLifecycleOwner(), s -> textViewStopwatch.setText(s));
 
         startStopButton.setOnClickListener(v -> {
             if (!startStopState) { // If stopped, and we click start
+                if (isTimerMode && counter == 0) {
+                    Toast.makeText(getContext(), "Add time to timer first", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 startStopState = true;
                 startStopButton.setText(R.string.stop);
-                if (pauseValue != 0) { // Resuming from pause
+                if (!isTimerMode && pauseValue != 0) { // Resuming stopwatch from pause
                     counter = pauseValue;
                 }
-                // counter is already set (either 0 or pauseValue)
+                // For timer, counter is already set, or for stopwatch it's 0 or pauseValue
+                pauseValue = 0; // Clear pauseValue once resumed/started
                 stopwatchHandler.post(stopwatchRunnable);
             } else { // If running, and we click stop
                 startStopState = false;
                 startStopButton.setText(R.string.start);
-                pauseValue = counter;
+                if (!isTimerMode) { // Store pauseValue only for stopwatch mode
+                    pauseValue = counter;
+                }
+                // For timer mode, stopping means pausing at the current countdown value (stored in counter)
                 stopwatchHandler.removeCallbacks(stopwatchRunnable);
             }
+            updateStopwatchDisplay(); // Update display on start/stop to reflect current state immediately
         });
 
         resetButton.setOnClickListener(v -> {
@@ -100,39 +144,117 @@ public class StopwatchFragment extends Fragment {
             stopwatchHandler.removeCallbacks(stopwatchRunnable);
             counter = 0;
             pauseValue = 0;
+            if (isTimerMode) {
+                // If in timer mode, reset should keep it in timer mode, ready for new input
+            } else {
+                // If in stopwatch mode, ensure it's fully reset to stopwatch defaults
+                isTimerMode = false; // Should already be false, but to be sure
+            }
+            updateTitleAndModeButton(); // Ensure title and mode button are correct
             updateStopwatchDisplay();
             startStopButton.setText(R.string.start);
         });
 
-        return root;
+        buttonPlus30.setOnClickListener(v -> {
+            if (startStopState && isTimerMode) { // Don't add time to a running timer
+                Toast.makeText(getContext(), "Stop timer to add time", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            counter += 30;
+            if (isTimerMode && !startStopState) pauseValue = counter; // Update effective time if timer is paused/being set
+            updateStopwatchDisplay();
+        });
+
+        buttonMinus30.setOnClickListener(v -> {
+            if (startStopState && isTimerMode) { // Don't subtract time from a running timer
+                Toast.makeText(getContext(), "Stop timer to subtract time", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            counter -= 30;
+            if (counter < 0) counter = 0;
+            if (isTimerMode && !startStopState) pauseValue = counter; // Update effective time if timer is paused/being set
+            updateStopwatchDisplay();
+        });
+
+        buttonModeToggle.setOnClickListener(v -> {
+            isTimerMode = !isTimerMode;
+            startStopState = false; // Stop any active counting
+            stopwatchHandler.removeCallbacks(stopwatchRunnable);
+            counter = 0;
+            pauseValue = 0;
+            updateTitleAndModeButton();
+            updateStopwatchDisplay();
+            startStopButton.setText(R.string.start);
+        });
+    }
+
+    private void updateTitleAndModeButton() {
+        ActionBar actionBar = null;
+        if (getActivity() instanceof AppCompatActivity) {
+            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        }
+
+        if (isTimerMode) {
+            if (actionBar != null) actionBar.setTitle(R.string.action_bar_title_timer);
+            buttonModeToggle.setText(R.string.stopwatch_mode_button);
+        } else {
+            if (actionBar != null) actionBar.setTitle(R.string.title_stopwatch);
+            buttonModeToggle.setText(R.string.timer_mode_button);
+        }
     }
 
     private void updateStopwatchDisplay() {
-        String[] formattedTimes = TimeManager.formatDurationStrings(startStopState ? counter : pauseValue);
+        int displayValue = counter;
+        if (isTimerMode && !startStopState && pauseValue == 0) { // When setting timer, show current counter
+             displayValue = counter;
+        } else if (!startStopState && !isTimerMode && pauseValue != 0) { // When stopwatch paused
+            displayValue = pauseValue;
+        } else if (!startStopState && isTimerMode && pauseValue !=0) { // when timer paused
+             displayValue = counter; // or pauseValue, depends on desired behavior for paused timer
+        }
+
+
+        String[] formattedTimes = TimeManager.formatDurationStrings(displayValue);
         stopwatchViewModel.setmText(getPresentationTimeByType(formattedTimes));
     }
+
+    private void playAlarmSound() {
+        if (getContext() == null) return;
+        try {
+            Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            if (alarmSound == null) {
+                alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            }
+            Ringtone r = RingtoneManager.getRingtone(getContext(), alarmSound);
+            if (r != null) {
+                r.play();
+            }
+        } catch (Exception e) {
+            // Could log e.printStackTrace();
+            Toast.makeText(getContext(), "Error playing alarm sound", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     @Override
     public void onResume() {
         super.onResume();
-        // If stopwatch was running and fragment is resumed, restart the handler
-        // This handles cases like screen rotation IF state is saved/restored properly
-        // For now, let's assume if it was running, it should continue.
-        if (startStopState) {
+        if (startStopState) { // If it was running (either mode)
             stopwatchHandler.post(stopwatchRunnable);
         }
+        updateTitleAndModeButton(); // Refresh title in case it was changed by another fragment/activity config change
+        updateStopwatchDisplay(); // Refresh display
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        // Stop the handler when the fragment is not visible to save resources
-        // but keep the state (counter, startStopState, pauseValue)
         stopwatchHandler.removeCallbacks(stopwatchRunnable);
+        // startStopState, counter, pauseValue, isTimerMode, presentationType are preserved
     }
 
     private String getPresentationTimeByType(String[] s) {
-        if (s == null || s.length < 4) return "00:00:00"; // Basic safety
+        if (s == null || s.length < 4) return TimeManager.formatDurationStrings(0)[1]; // Default to 00:00:00 decimal
         switch (presentationType) {
             case 'b': return s[0];
             case 'd': return s[1];
