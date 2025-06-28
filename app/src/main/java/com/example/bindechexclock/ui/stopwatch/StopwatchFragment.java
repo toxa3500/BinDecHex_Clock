@@ -161,19 +161,64 @@ public class StopwatchFragment extends Fragment {
                 return;
             }
             counter += 30;
-            if (isTimerMode && !startStopState) pauseValue = counter; // Update effective time if timer is paused/being set
+            if (isTimerMode && !startStopState) pauseValue = counter;
             updateStopwatchDisplay();
         });
 
+        // Setup for +30s button
+        buttonPlus30.setOnClickListener(v -> {
+            if (startStopState && isTimerMode) {
+                Toast.makeText(getContext(), "Stop timer to add time", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            counter += 30;
+            if (isTimerMode && !startStopState) { // If timer is being set (not running)
+                pauseValue = 0; // Clear pauseValue as counter is the source of truth for timer setting
+            }
+            updateStopwatchDisplay();
+        });
+
+        buttonPlus30.setOnLongClickListener(v -> {
+            if (startStopState && isTimerMode) {
+                Toast.makeText(getContext(), "Stop timer to add time", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            counter += 180; // Add 3 minutes
+            if (isTimerMode && !startStopState) {
+                pauseValue = 0;
+            }
+            updateStopwatchDisplay();
+            Toast.makeText(getContext(), "+ 3 minutes", Toast.LENGTH_SHORT).show();
+            return true; // Consume long click
+        });
+
+        // Setup for -30s button
         buttonMinus30.setOnClickListener(v -> {
-            if (startStopState && isTimerMode) { // Don't subtract time from a running timer
+            if (startStopState && isTimerMode) {
                 Toast.makeText(getContext(), "Stop timer to subtract time", Toast.LENGTH_SHORT).show();
                 return;
             }
             counter -= 30;
             if (counter < 0) counter = 0;
-            if (isTimerMode && !startStopState) pauseValue = counter; // Update effective time if timer is paused/being set
+            if (isTimerMode && !startStopState) {
+                pauseValue = 0;
+            }
             updateStopwatchDisplay();
+        });
+
+        buttonMinus30.setOnLongClickListener(v -> {
+            if (startStopState && isTimerMode) {
+                Toast.makeText(getContext(), "Stop timer to subtract time", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            counter -= 180; // Subtract 3 minutes
+            if (counter < 0) counter = 0;
+            if (isTimerMode && !startStopState) {
+                pauseValue = 0;
+            }
+            updateStopwatchDisplay();
+            Toast.makeText(getContext(), "- 3 minutes", Toast.LENGTH_SHORT).show();
+            return true; // Consume long click
         });
 
         buttonModeToggle.setOnClickListener(v -> {
