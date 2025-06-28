@@ -40,6 +40,7 @@ public class StopwatchFragment extends Fragment {
 
     private Button buttonPlus30, buttonMinus30, buttonModeToggle;
     private Button startStopButton; // Keep reference for text update
+    private Button resetButton; // <<<<< ADDED
     private TextView textViewStopwatch;
 
 
@@ -84,7 +85,7 @@ public class StopwatchFragment extends Fragment {
 
         textViewStopwatch = root.findViewById(R.id.text_stopwatch);
         startStopButton = root.findViewById(R.id.buttonStartStop);
-        final Button resetButton = root.findViewById(R.id.buttonReset);
+        resetButton = root.findViewById(R.id.buttonReset); // <<<<< MODIFIED (removed final, assigned to member)
 
         buttonPlus30 = root.findViewById(R.id.button_plus_30);
         buttonMinus30 = root.findViewById(R.id.button_minus_30);
