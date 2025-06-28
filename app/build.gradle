@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.bindechexclock"
-        minSdkVersion 23
+        minSdkVersion 26 // Changed from 23 to 26 (Android 8.0 Oreo)
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
