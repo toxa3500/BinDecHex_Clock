@@ -9,7 +9,12 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.bindechexclock.R;
-import com.example.bindechexclock.TimeManager;
+// Import the Kotlin top-level functions.
+// The actual import might be com.example.bindechexclock.TimeUtilsKt if TimeUtils.kt
+// doesn't have @file:JvmName annotation. For simplicity, we'll assume direct import works
+// or the correct Kotlin generated class name is used.
+import static com.example.bindechexclock.TimeUtilsKt.*;
+
 
 // Helper class for one-time events (already defined, assuming it's kept as is)
 // class Event<T> { ... }
@@ -110,12 +115,14 @@ public class StopwatchViewModel extends AndroidViewModel {
              displayValue = counter;
         }
 
-        String[] formattedTimes = TimeManager.formatDurationStrings(displayValue);
+        // Use the Kotlin top-level function formatDurationStrings
+        String[] formattedTimes = formatDurationStrings(displayValue);
         _timeDisplay.setValue(getPresentationTimeByType(formattedTimes));
     }
 
     private String getPresentationTimeByType(String[] s) {
-        if (s == null || s.length < 4) return TimeManager.formatDurationStrings(0)[1]; // Default
+        // Use the Kotlin top-level function formatDurationStrings for default if s is invalid
+        if (s == null || s.length < 4) return formatDurationStrings(0)[1]; // Default
         switch (presentationType) {
             case 'b': return application.getString(R.string.time_in) + " Binary:\n" + s[0];
             case 'd': return application.getString(R.string.time_in) + " Decimal:\n" + s[1];
