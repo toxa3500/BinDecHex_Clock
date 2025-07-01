@@ -14,6 +14,7 @@ import com.example.bindechexclock.R;
 // doesn't have @file:JvmName annotation. For simplicity, we'll assume direct import works
 // or the correct Kotlin generated class name is used.
 import static com.example.bindechexclock.TimeUtilsKt.*;
+import com.example.bindechexclock.ui.stopwatch.Event; // Added import for the new Kotlin Event class
 
 
 // Helper class for one-time events (already defined, assuming it's kept as is)
