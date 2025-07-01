@@ -1,21 +1,30 @@
 package com.example.bindechexclock.ui.stopwatch
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bindechexclock.R
 import com.example.bindechexclock.formatDurationStrings
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 // Event class should be defined in Kotlin or imported if already Kotlin
 // For this step, we assume 'Event.kt' exists in this package or is imported.
 // e.g., import com.example.bindechexclock.Event
 
-class StopwatchViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class StopwatchViewModel @Inject constructor(
+    private val application: Application
+    // TimeManager could be injected here if needed, but current logic doesn't directly use it.
+    // If StopwatchViewModel needs TimeManager:
+    // private val timeManager: TimeManager
+) : ViewModel() {
 
     // LiveData fields
     private val _timeDisplay = MutableLiveData<String>()

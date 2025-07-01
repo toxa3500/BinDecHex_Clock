@@ -3,8 +3,11 @@ package com.example.bindechexclock
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import java.util.Calendar
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class TimeManager {
+@Singleton
+class TimeManager @Inject constructor() {
 
     private val _binaryTimeLiveData = MutableLiveData<String>()
     val binaryTimeLiveData: LiveData<String> get() = _binaryTimeLiveData

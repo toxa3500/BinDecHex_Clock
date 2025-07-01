@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'dagger.hilt.android.plugin'
 
 android {
     compileSdk 36
@@ -54,9 +56,25 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
     implementation 'androidx.core:core-ktx:1.16.0'// Example version
 
+    // Hilt Dependencies
+    implementation "com.google.dagger:hilt-android:2.48"
+    kapt "com.google.dagger:hilt-compiler:2.48"
+    // For ViewModel injection
+    implementation 'androidx.hilt:hilt-navigation-fragment:1.0.0'
+
+
+    // Testing Dependencies
     testImplementation 'junit:junit:4.13.2' // Updated JUnit
+    testImplementation 'org.mockito:mockito-core:5.10.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:5.2.1'
+    testImplementation 'androidx.arch.core:core-testing:2.2.0' // For LiveData testing
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3' // For testing coroutines
+
     androidTestImplementation 'androidx.test:runner:1.6.2' // Downgraded
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1' // Downgraded
+    // Hilt testing
+    androidTestImplementation "com.google.dagger:hilt-android-testing:2.48"
+    kaptAndroidTest "com.google.dagger:hilt-compiler:2.48"
 }
 java {
     toolchain {
