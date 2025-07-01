@@ -1,13 +1,15 @@
 package com.example.bindechexclock.ui.stopwatch
 
 import android.app.Application
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.example.bindechexclock.R
-import com.example.bindechexclock.formatDurationStrings // Assuming direct import of top-level function
+import com.example.bindechexclock.formatDurationStrings
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // Event class should be defined in Kotlin or imported if already Kotlin
 // For this step, we assume 'Event.kt' exists in this package or is imported.
@@ -42,45 +44,57 @@ class StopwatchViewModel(application: Application) : AndroidViewModel(applicatio
     private var pauseValue: Int = 0 // Stores counter value when paused (mainly for stopwatch)
     private var presentationType: Char = 'd' // Default to decimal: 'b'inary, 'd'ecimal, 'h'ex, 'r'oman
     private var isTimerMode: Boolean = false // false = Stopwatch, true = Timer
-    private var internalStartStopState: Boolean = false // Tracks if handler should be running
+    private var internalStartStopState: Boolean = false // Tracks if the timer logic should be running
 
-    private lateinit var stopwatchHandler: Handler
-    private lateinit var stopwatchRunnable: Runnable
+    private var timerJob: Job? = null
 
     companion object {
         private const val UPDATE_INTERVAL_MS = 1000L // Kotlin Long
     }
 
     init {
-        initHandler()
+        // initHandler() removed
         updateUIComponentsText()
         updateStopwatchDisplay() // Initial display
     }
 
-    private fun initHandler() {
-        stopwatchHandler = Handler(Looper.getMainLooper())
-        stopwatchRunnable = Runnable {
-            if (!internalStartStopState) return@Runnable
+    // initHandler() and stopwatchRunnable removed
 
-            if (isTimerMode) { // Timer Mode
-                if (counter > 0) {
-                    counter--
-                }
-                if (counter <= 0) {
-                    counter = 0
-                    internalStartStopState = false // Stop the timer
-                    _isRunning.postValue(false)
-                    _startStopButtonText.postValue(getApplication<Application>().getString(R.string.start))
-                    _playAlarmEvent.postValue(Event(Unit)) // Signal alarm
-                    updateStopwatchDisplay() // Show 00:00:00
-                    return@Runnable // Do not re-post runnable
-                }
-            } else { // Stopwatch Mode
-                counter++
-            }
-            updateStopwatchDisplay()
-            stopwatchHandler.postDelayed(stopwatchRunnable, UPDATE_INTERVAL_MS)
+    private fun startTimerUpdates() {
+        if (timerJob?.isActive == true) {
+            return // Already running
         }
+        internalStartStopState = true
+        timerJob = viewModelScope.launch {
+            while (internalStartStopState) {
+                delay(UPDATE_INTERVAL_MS)
+                if (!internalStartStopState) break // Re-check state after delay before processing
+
+                if (isTimerMode) { // Timer Mode
+                    if (counter > 0) {
+                        counter--
+                    }
+                    if (counter <= 0) {
+                        counter = 0
+                        internalStartStopState = false // Stop the timer
+                        _isRunning.postValue(false)
+                        _startStopButtonText.postValue(getApplication<Application>().getString(R.string.start))
+                        _playAlarmEvent.postValue(Event(Unit)) // Signal alarm
+                        updateStopwatchDisplay() // Show 00:00:00
+                        break // Exit loop
+                    }
+                } else { // Stopwatch Mode
+                    counter++
+                }
+                updateStopwatchDisplay()
+            }
+        }
+    }
+
+    private fun stopTimerUpdates() {
+        internalStartStopState = false
+        timerJob?.cancel()
+        timerJob = null
     }
 
     private fun updateUIComponentsText() {
@@ -131,27 +145,26 @@ class StopwatchViewModel(application: Application) : AndroidViewModel(applicatio
                 _toastMessageEvent.value = Event("Add time to timer first")
                 return
             }
-            internalStartStopState = true
+            // internalStartStopState will be set by startTimerUpdates
             if (!isTimerMode && pauseValue != 0) {
                 counter = pauseValue
             }
             pauseValue = 0
-            stopwatchHandler.post(stopwatchRunnable)
+            startTimerUpdates()
         } else { // If running, and we click stop
-            internalStartStopState = false
+            // internalStartStopState will be set by stopTimerUpdates
             if (!isTimerMode) {
                 pauseValue = counter
             }
-            stopwatchHandler.removeCallbacks(stopwatchRunnable)
+            stopTimerUpdates()
         }
-        _isRunning.value = internalStartStopState
+        _isRunning.value = internalStartStopState // This should reflect the change from start/stopTimerUpdates
         _startStopButtonText.value = if (internalStartStopState) app.getString(R.string.stop) else app.getString(R.string.start)
         updateStopwatchDisplay() // Update display immediately
     }
 
     fun onResetClicked() {
-        internalStartStopState = false
-        stopwatchHandler.removeCallbacks(stopwatchRunnable)
+        stopTimerUpdates()
         counter = 0
         pauseValue = 0
         // isTimerMode remains unchanged on reset, user explicitly toggles mode
@@ -194,8 +207,7 @@ class StopwatchViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun onModeToggleClicked() {
         isTimerMode = !isTimerMode
-        internalStartStopState = false // Stop any active counting
-        stopwatchHandler.removeCallbacks(stopwatchRunnable)
+        stopTimerUpdates()
         counter = 0
         pauseValue = 0
         updateUIComponentsText()
@@ -214,19 +226,23 @@ class StopwatchViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun onFragmentResumed() {
-        if (internalStartStopState) {
-            stopwatchHandler.post(stopwatchRunnable)
+        if (internalStartStopState) { // If it was supposed to be running
+            startTimerUpdates()
         }
         updateUIComponentsText() // Refresh titles/button text
         updateStopwatchDisplay() // Refresh display
     }
 
     fun onFragmentPaused() {
-        stopwatchHandler.removeCallbacks(stopwatchRunnable)
+        // Decide if we want to truly stop the timer or just UI updates.
+        // Current logic implies stopping the timer job.
+        // If internalStartStopState is true, it means it was running.
+        // We don't change internalStartStopState here, so onResume can pick it up.
+        timerJob?.cancel() // Cancel the job, but keep internalStartStopState
     }
 
     override fun onCleared() {
         super.onCleared()
-        stopwatchHandler.removeCallbacks(stopwatchRunnable) // Clean up handler
+        stopTimerUpdates() // Clean up coroutine
     }
 }
