@@ -33,7 +33,7 @@ android {
     }
     namespace 'com.example.bindechexclock'
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = '1.8' // Changed to 1.8 for Kapt compatibility
     }
     // namespace 'com.example.bindechexclock' // Removed: Not supported by AGP 4.0.1
 }
@@ -57,10 +57,12 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.16.0'// Example version
 
     // Hilt Dependencies
-    implementation "com.google.dagger:hilt-android:2.48"
-    kapt "com.google.dagger:hilt-compiler:2.48"
+    implementation "com.google.dagger:hilt-android:2.44" // Downgraded Hilt
+    kapt "com.google.dagger:hilt-compiler:2.44" // Downgraded Hilt
     // For ViewModel injection
     implementation 'androidx.hilt:hilt-navigation-fragment:1.0.0'
+    // Note: hilt-navigation-fragment might need version alignment if issues persist,
+    // but 1.0.0 is generally compatible with a wide range of Hilt versions.
 
 
     // Testing Dependencies
@@ -73,8 +75,8 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.6.2' // Downgraded
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1' // Downgraded
     // Hilt testing
-    androidTestImplementation "com.google.dagger:hilt-android-testing:2.48"
-    kaptAndroidTest "com.google.dagger:hilt-compiler:2.48"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:2.44" // Aligned Hilt version
+    kaptAndroidTest "com.google.dagger:hilt-compiler:2.44" // Aligned Hilt version
 }
 java {
     toolchain {
